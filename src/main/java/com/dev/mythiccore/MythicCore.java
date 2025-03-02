@@ -33,7 +33,6 @@ import com.dev.mythiccore.utils.ConfigLoader;
 import com.dev.mythiccore.visuals.DamageIndicatorEvent;
 import com.dev.mythiccore.visuals.HealthBar;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
-import io.lumine.mythic.api.skills.SkillTrigger;
 import io.lumine.mythic.lib.MythicLib;
 import io.lumine.mythic.lib.skill.trigger.TriggerType;
 import io.lumine.mythic.lib.util.ConfigFile;
@@ -107,7 +106,6 @@ public final class MythicCore extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new ReactionStatistic(), this);
         Bukkit.getPluginManager().registerEvents(new DamagePerHitStatistic(), this);
         Bukkit.getPluginManager().registerEvents(new DendroCoreReactionStatistic(), this);
-        Bukkit.getPluginManager().registerEvents(new StatsChanged(), this);
         registerMMOItemStat();
 
         ReactionManager.registerDefaultReactions();

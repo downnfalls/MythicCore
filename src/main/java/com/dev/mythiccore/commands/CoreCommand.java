@@ -9,11 +9,9 @@ import com.dev.mythiccore.reaction.ReactionManager;
 import com.dev.mythiccore.utils.ConfigLoader;
 import com.dev.mythiccore.utils.Utils;
 import com.dev.mythiccore.visuals.HealthBar;
-import com.dev.mythiccore.visuals.HealthBarSettings;
 import de.tr7zw.nbtapi.NBTItem;
 import io.lumine.mythic.lib.MythicLib;
 import io.lumine.mythic.lib.api.player.EquipmentSlot;
-import io.lumine.mythic.lib.api.stat.StatInstance;
 import io.lumine.mythic.lib.damage.DamagePacket;
 import io.lumine.mythic.lib.damage.DamageType;
 import io.lumine.mythic.lib.element.Element;
@@ -45,6 +43,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.Type;
 import java.util.*;
 
 public class CoreCommand implements CommandExecutor, TabExecutor {
@@ -131,13 +130,6 @@ public class CoreCommand implements CommandExecutor, TabExecutor {
                         sender.sendMessage(ConfigLoader.getMessage("syntax-error", true));
                     }
                 } else if (args[0].equals("test")) {
-
-                    PlayerData playerData = PlayerData.get(player);
-                    for (StatInstance statInstance : playerData.getStats().getMap().getInstances()) {
-                        if (statInstance.getTotal() > 0) {
-                            player.sendMessage(ChatColor.LIGHT_PURPLE+statInstance.getStat()+": "+ChatColor.RED+statInstance.getBase()+" "+statInstance.getTotal());
-                        }
-                    }
 
                     /*
                     double radius = 5;

@@ -61,7 +61,7 @@ public class DendroCoreManager {
     }
 
     public static void dendroCoreTick() {
-        Bukkit.getScheduler().runTaskTimer(MythicCore.getInstance(), ()->{
+        Bukkit.getScheduler().runTaskTimerAsynchronously(MythicCore.getInstance(), ()->{
             try {
                 for (Chunk chunk : dendroCoreInChunk.keySet()) {
                     List<DendroCore> dendroCores = dendroCoreInChunk.get(chunk);
