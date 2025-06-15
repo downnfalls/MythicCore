@@ -2,7 +2,6 @@ package com.dev.mythiccore.statistic;
 
 import com.dev.mythiccore.MythicCore;
 import com.dev.mythiccore.listener.events.MakeReactionEvent;
-import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

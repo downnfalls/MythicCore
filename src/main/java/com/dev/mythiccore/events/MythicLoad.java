@@ -22,7 +22,7 @@ public class MythicLoad implements Listener {
 
     @EventHandler
     public void onMythicMechanicLoad(MythicMechanicLoadEvent event) {
-        if(event.getMechanicName().equalsIgnoreCase("elemental_damage")) {
+        if (event.getMechanicName().equalsIgnoreCase("elemental_damage")) {
             event.register(new ElementalDamage(event.getConfig()));
         }
         else if (event.getMechanicName().equalsIgnoreCase("reduce_defense"))	{

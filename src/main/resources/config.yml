@@ -637,7 +637,9 @@ message:
   invalid-decay-rate: "&cDecay Rate ไม่ถูกต้อง!"
   invalid-aura: "&cออร่าไม่ถูกต้อง!"
   player-not-found: "&cไม่พบผู้เล่น"
-  syntax-error: "&cคำสั่งไม่ถูกต้อง!"
   apply-aura-success: "&eใส่ออร่า &6{aura} &eให้กับ &f{player} &eด้วยเกจธาตุ &b{gauge}"
   reload-success: "&eรีโหลดเรียบร้อยแล้ว!"
+  invalid-syntax: "&cInvalid command syntax!"
+  usage: "&7Usage: &e{command}"
+  must-be-player: "&cYou must be player to use this command!"
 

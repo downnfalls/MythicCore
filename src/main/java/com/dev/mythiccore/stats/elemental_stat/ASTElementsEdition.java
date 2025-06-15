@@ -36,7 +36,7 @@ public class ASTElementsEdition extends EditionInventory {
 
     public Inventory getInventory() {
         Inventory inv = Bukkit.createInventory(this, 54, "Elements: " + this.template.getId());
-        Optional<ASTRandomElementStatData> statData = this.getEventualStatData(MythicCore.elementStat);
+        Optional<ASTRandomElementStatData> statData = this.getEventualStatData(MythicCore.ELEMENT_STAT);
         ItemStack prevPage = new ItemStack(Material.ARROW);
         ItemMeta prevPageMeta = prevPage.getItemMeta();
         prevPageMeta.setDisplayName(ChatColor.GREEN + "Previous Page");
@@ -96,7 +96,7 @@ public class ASTElementsEdition extends EditionInventory {
                 if (edited != null) {
                     String elementPath = edited.getValue().getConcatenatedConfigPath(edited.getKey());
                     if (event.getAction() == InventoryAction.PICKUP_ALL) {
-                        (new StatEdition(this, MythicCore.elementStat, elementPath)).enable("Write in the value you want.");
+                        (new StatEdition(this, MythicCore.ELEMENT_STAT, elementPath)).enable("Write in the value you want.");
                     } else if (event.getAction() == InventoryAction.PICKUP_HALF) {
                         this.getEditedSection().set("ast-element." + elementPath, null);
                         String elementName = edited.getKey().getId();

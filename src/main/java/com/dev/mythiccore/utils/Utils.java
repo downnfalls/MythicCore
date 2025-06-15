@@ -14,8 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 import java.text.DecimalFormat;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -137,5 +136,16 @@ public class Utils {
         } else {
             return String.format("%.2f", number);
         }
+    }
+
+    public static List<String> tabComplete(String a, List<String> arg) {
+        List<String> matches = new ArrayList<>();
+        String search = a.toLowerCase(Locale.ROOT);
+        for (String s : arg) {
+            if (s.toLowerCase(Locale.ROOT).startsWith(search)) {
+                matches.add(s);
+            }
+        }
+        return matches;
     }
 }
