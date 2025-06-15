@@ -4,8 +4,6 @@ import com.dev.mythiccore.MythicCore;
 import com.dev.mythiccore.utils.Utils;
 import io.lumine.mythic.lib.MythicLib;
 import io.lumine.mythic.lib.element.Element;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 
 import java.util.*;
 
