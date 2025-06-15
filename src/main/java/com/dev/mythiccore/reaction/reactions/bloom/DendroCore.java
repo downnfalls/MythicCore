@@ -99,27 +99,33 @@ public class DendroCore {
             }
         }
 
-        for (Entity entity : dendro_core.getNearbyEntities(explode_radius, explode_radius, explode_radius)) {
-            boolean mob_type_filter = owner != null && ConfigLoader.aoeDamageFilterEnable() && mob_type != Combat.getMobType(entity);
-            if (entity == owner || entity.isInvulnerable() || entity.hasMetadata("NPC") || mob_type_filter || (entity instanceof Player player && (player.getGameMode().equals(GameMode.CREATIVE) || player.getGameMode().equals(GameMode.SPECTATOR)))) continue;
-            if (entity instanceof LivingEntity livingEntity && !livingEntity.isInvulnerable()) {
+        try {
 
-                double resistance_multiplier = StatCalculation.getResistanceMultiplier(livingEntity.getUniqueId(), instance.getConfig().getString("damage-element"));
+            for (Entity entity : dendro_core.getNearbyEntities(explode_radius, explode_radius, explode_radius)) {
+                boolean mob_type_filter = owner != null && ConfigLoader.aoeDamageFilterEnable() && mob_type != Combat.getMobType(entity);
+                if (entity == owner || entity.isInvulnerable() || entity.hasMetadata("NPC") || mob_type_filter || (entity instanceof Player player && (player.getGameMode().equals(GameMode.CREATIVE) || player.getGameMode().equals(GameMode.SPECTATOR))))
+                    continue;
+                if (entity instanceof LivingEntity livingEntity && !livingEntity.isInvulnerable()) {
 
-                String formula = instance.getConfig().getString("dendro-core-explode-damage");
-                assert formula != null;
-                Expression expression = new ExpressionBuilder(formula)
-                        .variables("attacker_level", "elemental_mastery", "resistance_multiplier", "bloom_bonus")
-                        .build()
-                        .setVariable("attacker_level", attacker_level)
-                        .setVariable("elemental_mastery", elemental_mastery)
-                        .setVariable("resistance_multiplier", resistance_multiplier)
-                        .setVariable("bloom_bonus", bloom_bonus);
+                    double resistance_multiplier = StatCalculation.getResistanceMultiplier(livingEntity.getUniqueId(), instance.getConfig().getString("damage-element"));
 
-                double final_damage = expression.evaluate();
+                    String formula = instance.getConfig().getString("dendro-core-explode-damage");
+                    assert formula != null;
+                    Expression expression = new ExpressionBuilder(formula)
+                            .variables("attacker_level", "elemental_mastery", "resistance_multiplier", "bloom_bonus")
+                            .build()
+                            .setVariable("attacker_level", attacker_level)
+                            .setVariable("elemental_mastery", elemental_mastery)
+                            .setVariable("resistance_multiplier", resistance_multiplier)
+                            .setVariable("bloom_bonus", bloom_bonus);
 
-                instance.damage(final_damage, owner, livingEntity, instance.getConfig().getString("damage-element"), false, false, true, false, damage_cause);
+                    double final_damage = expression.evaluate();
+
+                    instance.damage(final_damage, owner, livingEntity, instance.getConfig().getString("damage-element"), false, false, true, false, damage_cause);
+                }
             }
+        } catch (Exception exception) {
+            exception.printStackTrace();
         }
 
         // visual

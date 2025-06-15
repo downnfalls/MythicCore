@@ -67,7 +67,7 @@ public class DendroCoreManager {
                     List<DendroCore> dendroCores = dendroCoreInChunk.get(chunk);
                     for (DendroCore dendroCore : dendroCores) {
                         if (dendroCore.getLifeTime() <= 1) {
-                            dendroCore.ignite();
+                            Bukkit.getScheduler().runTask(MythicCore.getInstance(), dendroCore::ignite);
                         } else {
                             dendroCore.setLifeTime(dendroCore.getLifeTime() - 1);
                         }
