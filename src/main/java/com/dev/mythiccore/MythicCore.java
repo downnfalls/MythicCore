@@ -4,7 +4,7 @@ import com.dev.mythiccore.api.PlaceholderHook;
 import com.dev.mythiccore.aura.Aura;
 import com.dev.mythiccore.buff.Buff;
 import com.dev.mythiccore.combat.Combat;
-import com.dev.mythiccore.commands.CoreCommand;
+import com.dev.mythiccore.commands.main.MythicCoreCommand;
 import com.dev.mythiccore.cooldown.InternalCooldown;
 import com.dev.mythiccore.events.*;
 import com.dev.mythiccore.events.attack_handle.*;
@@ -24,10 +24,7 @@ import com.dev.mythiccore.reaction.reactions.frozen.FreezeEffect;
 import com.dev.mythiccore.statistic.DamagePerHitStatistic;
 import com.dev.mythiccore.statistic.DendroCoreReactionStatistic;
 import com.dev.mythiccore.statistic.ReactionStatistic;
-import com.dev.mythiccore.stats.DamageFormulaStat;
-import com.dev.mythiccore.stats.GaugeUnitStat;
-import com.dev.mythiccore.stats.InternalCooldownStat;
-import com.dev.mythiccore.stats.WeaponTypeStat;
+import com.dev.mythiccore.stats.*;
 import com.dev.mythiccore.stats.elemental_stat.ASTElements;
 import com.dev.mythiccore.utils.ConfigLoader;
 import com.dev.mythiccore.visuals.DamageIndicatorEvent;
@@ -50,7 +47,11 @@ import java.util.Objects;
 
 public final class MythicCore extends JavaPlugin {
 
-    public static ASTElements elementStat;
+    public static ASTElements ELEMENT_STAT;
+    public static UnsocketAll UNSOCKET_ALL;
+    public static RemoveGemstone REMOVE_GEMSTONE;
+    public static RandomUnsocket RANDOM_UNSOCKET;
+
     private static MythicCore instance;
     private static Aura aura;
     private static Buff buff;
@@ -67,7 +68,10 @@ public final class MythicCore extends JavaPlugin {
         buff = new Buff();
         cooldown = new InternalCooldown();
         reactionManager = new ReactionManager();
-        elementStat = new ASTElements();
+        ELEMENT_STAT = new ASTElements();
+        UNSOCKET_ALL = new UnsocketAll();
+        REMOVE_GEMSTONE = new RemoveGemstone();
+        RANDOM_UNSOCKET = new RandomUnsocket();
 
 //        loadResource(this, "config.yml");
         getConfig().options().copyDefaults();
@@ -80,7 +84,7 @@ public final class MythicCore extends JavaPlugin {
 
         DendroCoreManager.dendroCoreTick();
 
-        Objects.requireNonNull(Bukkit.getPluginCommand("mythiccore")).setExecutor(new CoreCommand());
+        Objects.requireNonNull(Bukkit.getPluginCommand("mythiccore")).setExecutor(new MythicCoreCommand(null));
 
         //Register EventListener
         Bukkit.getPluginManager().registerEvents(new MythicLoad(), this);
@@ -163,7 +167,11 @@ public final class MythicCore extends JavaPlugin {
     public static InternalCooldown getCooldownManager() { return cooldown; }
     public static ReactionManager getReactionManager() { return reactionManager; }
     private void registerMMOItemStat() {
-        MMOItems.plugin.getStats().register(elementStat);
+        MMOItems.plugin.getStats().register(new Abilities());
+        MMOItems.plugin.getStats().register(ELEMENT_STAT);
+        MMOItems.plugin.getStats().register(UNSOCKET_ALL);
+        MMOItems.plugin.getStats().register(REMOVE_GEMSTONE);
+        MMOItems.plugin.getStats().register(RANDOM_UNSOCKET);
         MMOItems.plugin.getStats().register(new GaugeUnitStat());
         MMOItems.plugin.getStats().register(new InternalCooldownStat());
         MMOItems.plugin.getStats().register(new DamageFormulaStat());
