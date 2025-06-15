@@ -2,7 +2,6 @@ package com.dev.mythiccore.commands.main;
 
 import com.dev.mythiccore.commands.CommandTreeNode;
 import net.Indyuce.mmoitems.api.item.mmoitem.LiveMMOItem;
-import net.Indyuce.mmoitems.stat.data.DoubleData;
 import net.Indyuce.mmoitems.stat.type.DoubleStat;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
