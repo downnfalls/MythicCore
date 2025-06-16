@@ -29,7 +29,7 @@ public class Burgeon extends DendroCoreReaction {
     public void trigger(DendroCore dendro_core, LivingEntity entity, @Nullable Entity damager, StatProvider stats, EntityDamageEvent.DamageCause damage_cause) {
 
         int check_radius = getConfig().getInt("check-radius");
-        for (Entity e : dendro_core.getDendroCore().getNearbyEntities(check_radius, check_radius, check_radius)) {
+        for (Entity e : dendro_core.getHologram().getWorld().getNearbyEntities(dendro_core.getHologram().getLocation(), check_radius, check_radius, check_radius)) {
             if (e instanceof LivingEntity livingEntity) {
                 if (e == damager) continue;
                 if (ConfigLoader.aoeDamageFilterEnable() && damager != null && !Combat.getLastMobType(damager).equals(Combat.getMobType(e))) continue;
@@ -75,7 +75,7 @@ public class Burgeon extends DendroCoreReaction {
                         float volume = Float.parseFloat(raw_sound[1]);
                         float pitch = Float.parseFloat(raw_sound[2]);
 
-                        dendro_core.getDendroCore().getWorld().playSound(dendro_core.getDendroCore().getLocation(), Sound.valueOf(sound), volume, pitch);
+                        dendro_core.getHologram().getWorld().playSound(dendro_core.getHologram().getLocation(), Sound.valueOf(sound), volume, pitch);
                     }
 
                     for (String p : getConfig().getStringList("explode-particle")) {
@@ -84,13 +84,13 @@ public class Burgeon extends DendroCoreReaction {
                         double speed = Double.parseDouble(raw_particle[1]);
                         int count = Integer.parseInt(raw_particle[2]);
 
-                        dendro_core.getDendroCore().getWorld().spawnParticle(Particle.valueOf(particle), dendro_core.getDendroCore().getLocation(), count, 0, 0, 0, speed);
+                        dendro_core.getHologram().getWorld().spawnParticle(Particle.valueOf(particle), dendro_core.getHologram().getLocation(), count, 0, 0, 0, speed);
                     }
 
                 } catch (NumberFormatException ignored) {}
 
                 finally {
-                    dendro_core.getDendroCore().remove();
+                    dendro_core.remove();
                 }
 
             }

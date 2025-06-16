@@ -36,9 +36,9 @@ public class HyperBloom extends DendroCoreReaction {
     public void trigger(DendroCore dendro_core, LivingEntity entity, @Nullable Entity damager, StatProvider stats, EntityDamageEvent.DamageCause damage_cause) {
 
         int check_radius = getConfig().getInt("check-radius");
-        Location dendroCoreLocation = dendro_core.getDendroCore().getLocation();
+        Location dendroCoreLocation = dendro_core.getHologram().getLocation();
 
-        LivingEntity target_entity = dendro_core.getDendroCore().getNearbyEntities(check_radius, check_radius, check_radius).stream()
+        LivingEntity target_entity = dendro_core.getHologram().getWorld().getNearbyEntities(dendroCoreLocation, check_radius, check_radius, check_radius).stream()
                 .filter(e -> e instanceof LivingEntity)
                 .filter(e -> !e.equals(damager))
                 .filter(e -> !(ConfigLoader.aoeDamageFilterEnable() && damager != null && !Combat.getLastMobType(damager).equals(Combat.getMobType(e))))
@@ -54,24 +54,24 @@ public class HyperBloom extends DendroCoreReaction {
 
         Bukkit.getScheduler().runTaskTimer(MythicCore.getInstance(), (task)->{
 
-            Location startLocation = dendro_core.getDendroCore().getLocation();
+            Location startLocation = dendro_core.getHologram().getLocation();
             Location targetLocation = target_entity.getLocation();
 
             if (!target_entity.isValid()) {
                 task.cancel();
-                dendro_core.getDendroCore().remove();
+                dendro_core.remove();
                 return;
             }
 
             if (target_entity.isDead()) {
                 task.cancel();
-                dendro_core.getDendroCore().remove();
+                dendro_core.remove();
                 return;
             }
 
-            if (!dendro_core.getDendroCore().isValid()) {
+            if (!dendro_core.getHologram().isEnabled()) {
                 task.cancel();
-                dendro_core.getDendroCore().remove();
+                dendro_core.remove();
                 return;
             }
 
@@ -135,27 +135,29 @@ public class HyperBloom extends DendroCoreReaction {
                 } catch (NumberFormatException ignored) {}
 
                 finally {
-                    dendro_core.getDendroCore().remove();
+                    dendro_core.remove();
                 }
 
+            } else {
+
+                double force = dendro_core.getInstance().getConfig().getDouble("sub-reaction.HYPERBLOOM.pulling-force");
+                double thetaX = Math.acos(direction.getX() / direction.length());
+                double thetaY = Math.acos(direction.getY() / direction.length());
+                double thetaZ = Math.acos(direction.getZ() / direction.length());
+                Vector force_axis = new Vector(force * Math.cos(thetaX), force * Math.cos(thetaY), force * Math.cos(thetaZ));
+
+                double time = (System.currentTimeMillis() - start_time) / 1000.0;
+                double xOffset = (0 * time + 0.5 * force_axis.getX() * Math.pow(time, 2)) * 0.1;
+                double yOffset = (dendro_core.getInstance().getConfig().getDouble("sub-reaction.HYPERBLOOM.take-off-velocity") * time + 0.5 * (force_axis.getY() - (-10)) * Math.pow(time, 2)) * 0.1;
+                double zOffset = (0 * time + 0.5 * force_axis.getZ() * Math.pow(time, 2)) * 0.1;
+
+                Location newLocation = startLocation.clone().add(xOffset, yOffset, zOffset);
+                Location d = new Location(startLocation.getWorld(), 0, 0, 0);
+                d.setDirection(direction);
+                Utils.generateParticles(Particle.valueOf(getConfig().getString("launch-particle.particle")), getConfig().getDouble("launch-particle.radius"), getConfig().getInt("launch-particle.points"), getConfig().getDouble("launch-particle.speed"), startLocation, d.getPitch(), -d.getYaw());
+                dendro_core.getHologram().setLoc(newLocation);
+                dendro_core.getHologram().update();
             }
-
-            double force = dendro_core.getInstance().getConfig().getDouble("sub-reaction.HYPERBLOOM.pulling-force");
-            double thetaX = Math.acos(direction.getX() / direction.length());
-            double thetaY = Math.acos(direction.getY() / direction.length());
-            double thetaZ = Math.acos(direction.getZ() / direction.length());
-            Vector force_axis = new Vector(force*Math.cos(thetaX), force*Math.cos(thetaY), force*Math.cos(thetaZ));
-
-            double time = (System.currentTimeMillis()-start_time) / 1000.0;
-            double xOffset = (0 * time + 0.5 * force_axis.getX() * Math.pow(time, 2)) * 0.1;
-            double yOffset = (dendro_core.getInstance().getConfig().getDouble("sub-reaction.HYPERBLOOM.take-off-velocity") * time + 0.5 * (force_axis.getY() - (-10)) * Math.pow(time, 2)) * 0.1;
-            double zOffset = (0 * time + 0.5 * force_axis.getZ() * Math.pow(time, 2)) * 0.1;
-
-            Location newLocation = startLocation.clone().add(xOffset, yOffset, zOffset);
-            Location d = new Location(startLocation.getWorld(), 0, 0, 0);
-            d.setDirection(direction);
-            Utils.generateParticles(Particle.valueOf(getConfig().getString("launch-particle.particle")), getConfig().getDouble("launch-particle.radius"), getConfig().getInt("launch-particle.points"), getConfig().getDouble("launch-particle.speed"),startLocation, d.getPitch(), -d.getYaw());
-            dendro_core.getDendroCore().teleport(newLocation);
 
 
         },0,1);

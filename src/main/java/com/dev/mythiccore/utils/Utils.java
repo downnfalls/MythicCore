@@ -56,6 +56,17 @@ public class Utils {
         }
     }
 
+    public static void displayIndicator(String text, Location location) {
+        ConfigurationSection config = MythicCore.getInstance().getConfig().getConfigurationSection("Indicators");
+        ASTDamageIndicators indicators = new ASTDamageIndicators(config);
+        assert config != null;
+        String format = config.getString("shield-attack-format");
+        assert format != null;
+        double a = new Random().nextDouble() * Math.PI * 2.0;
+
+        Bukkit.getScheduler().runTask(MythicCore.getInstance(), ()->indicators.displayIndicator(location, indicators.computeFormat(0, false, text, null), new Vector(Math.cos(a), 0.0, Math.sin(a))));
+    }
+
     public static float getMantissa(float number, int exponent) {
         return number / (float) Math.pow(10, exponent);
     }

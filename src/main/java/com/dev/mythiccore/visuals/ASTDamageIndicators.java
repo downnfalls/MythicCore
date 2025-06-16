@@ -1,19 +1,26 @@
 package com.dev.mythiccore.visuals;
 
 import io.lumine.mythic.lib.MythicLib;
+import io.lumine.mythic.lib.api.event.IndicatorDisplayEvent;
 import io.lumine.mythic.lib.damage.DamageMetadata;
 import io.lumine.mythic.lib.damage.DamagePacket;
 import io.lumine.mythic.lib.damage.DamageType;
 import io.lumine.mythic.lib.element.Element;
+import io.lumine.mythic.lib.hologram.Hologram;
 import io.lumine.mythic.lib.listener.option.GameIndicators;
 import io.lumine.mythic.lib.util.CustomFont;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Entity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -29,6 +36,11 @@ public class ASTDamageIndicators extends GameIndicators {
     public final boolean enable;
     public final @Nullable CustomFont font;
     public final @Nullable CustomFont fontCrit;
+    private final double radialVelocity;
+    private final double gravity;
+    private final double initialUpwardVelocity;
+    private final double entityHeightPercentage;
+    private final double yOffset;
 
     public ASTDamageIndicators(ConfigurationSection config) {
         super(config);
@@ -36,6 +48,11 @@ public class ASTDamageIndicators extends GameIndicators {
         this.splitHolograms = config.getBoolean("split-holograms");
         this.format = config.getString("format");
         this.crit_format = config.getString("crit-format");
+        this.radialVelocity = config.getDouble("radial-velocity", (double)1.0F);
+        this.gravity = config.getDouble("gravity", (double)1.0F);
+        this.initialUpwardVelocity = config.getDouble("initial-upward-velocity", (double)1.0F);
+        this.entityHeightPercentage = config.getDouble("entity-height-percent", (double)0.75F);
+        this.yOffset = config.getDouble("y-offset", 0.1);
         if (config.getBoolean("custom-font.enabled")) {
             this.font = new CustomFont(Objects.requireNonNull(config.getConfigurationSection("custom-font.normal")));
             this.fontCrit = new CustomFont(Objects.requireNonNull(config.getConfigurationSection("custom-font.crit")));
@@ -122,5 +139,47 @@ public class ASTDamageIndicators extends GameIndicators {
         CustomFont indicatorFont = (crit && ASTDamageIndicators.this.fontCrit != null) ? ASTDamageIndicators.this.fontCrit : ASTDamageIndicators.this.font;
         String formattedDamage = indicatorFont == null ? ASTDamageIndicators.this.formatNumber(damage) : indicatorFont.format(ASTDamageIndicators.this.formatNumber(damage));
         return MythicLib.plugin.getPlaceholderParser().parse(null, format.replace("{color}", (element != null) ? element.getColor() : "").replace("{icon}", (element != null) ? element.getLoreIcon() : "").replace("{value}", formattedDamage));
+    }
+
+    @Override
+    public void displayIndicator(Entity entity, String message, @NotNull Vector dir, IndicatorDisplayEvent.IndicatorType type) {
+        IndicatorDisplayEvent called = new IndicatorDisplayEvent(entity, message, type);
+        Bukkit.getPluginManager().callEvent(called);
+        if (!called.isCancelled()) {
+            Location loc = entity.getLocation().add((random.nextDouble() - (double)0.5F) * 1.2, this.yOffset + entity.getHeight() * this.entityHeightPercentage, (random.nextDouble() - (double)0.5F) * 1.2);
+            this.displayIndicator(loc, called.getMessage(), dir);
+        }
+    }
+
+    public void displayIndicator(final Location loc, String message, final @NotNull Vector dir) {
+        final Hologram holo = Hologram.create(loc, MythicLib.plugin.parseColors(Collections.singletonList(message)));
+        (new BukkitRunnable() {
+            double v;
+            int i;
+            private final double acc;
+            private final double dt;
+
+            {
+                this.v = (double)6.0F * ASTDamageIndicators.this.initialUpwardVelocity;
+                this.i = 0;
+                this.acc = (double)-10.0F * ASTDamageIndicators.this.gravity;
+                this.dt = 0.15;
+            }
+
+            public void run() {
+                if (this.i == 0) {
+                    dir.multiply((double)2.0F * ASTDamageIndicators.this.radialVelocity);
+                }
+
+                if (this.i++ >= 7) {
+                    holo.despawn();
+                    this.cancel();
+                } else {
+                    this.v += this.acc * 0.15;
+                    loc.add(dir.getX() * 0.15, this.v * 0.15, dir.getZ() * 0.15);
+                    holo.updateLocation(loc);
+                }
+            }
+        }).runTaskTimer(MythicLib.plugin, 0L, 3L);
     }
 }

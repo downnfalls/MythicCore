@@ -1,5 +1,7 @@
 package com.dev.mythiccore.reaction.reactions.bloom;
 
+import com.Zrips.CMI.CMI;
+import com.Zrips.CMI.Modules.Holograms.CMIHologram;
 import com.dev.mythiccore.MythicCore;
 import com.dev.mythiccore.enums.AttackSource;
 import com.dev.mythiccore.library.attackMetadata.ASTAttackMetadata;
@@ -14,6 +16,7 @@ import io.lumine.mythic.lib.api.stat.provider.StatProvider;
 import io.lumine.mythic.lib.damage.DamageMetadata;
 import io.lumine.mythic.lib.damage.DamagePacket;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.EventHandler;
@@ -22,7 +25,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import java.util.*;
 
 public class DendroCoreTrigger implements Listener {
 
@@ -57,32 +60,36 @@ public class DendroCoreTrigger implements Listener {
 
         double trigger_radius = ConfigLoader.getReactionConfig().getDouble("BLOOM.dendro-core-trigger-radius");
 
+        List<DendroCore> dendroCores = getNearbyDendroCore(entity.getLocation(), trigger_radius);
+        for (DendroCore dendroCore : dendroCores) {
+            assert dendroCore != null;
 
+            for (DamagePacket packet : damage.getPackets()) {
+                if (packet.getElement() == null) continue;
 
-        List<Entity> entities = entity.getNearbyEntities(trigger_radius, trigger_radius, trigger_radius);
-        for (Entity nearbyEntity : entities) {
+                for (DendroCoreReaction reaction : MythicCore.getReactionManager().getDendroCoreReactions().values()) {
+                    if (reaction.getTrigger().equals(packet.getElement().getId())) {
+                        dendroCore.setIgnited(true);
 
-            if (nearbyEntity.hasMetadata("AST_DENDRO_CORE_ENTITY") && !nearbyEntity.hasMetadata("AST_DENDRO_CORE_TRIGGERED")) {
+                        Bukkit.getPluginManager().callEvent(new DendroCoreReactionEvent(damager, reaction));
+                        if (!reaction.getDisplay().isEmpty()) Utils.displayIndicator(reaction.getDisplay(), dendroCore.getHologram().getLocation());
 
-                DendroCore dendroCore = (DendroCore) nearbyEntity.getMetadata("AST_DENDRO_CORE_ENTITY").get(0).value();
-                assert dendroCore != null;
-
-                for (DamagePacket packet : damage.getPackets()) {
-                    if (packet.getElement() == null) continue;
-
-                    for (DendroCoreReaction reaction : MythicCore.getReactionManager().getDendroCoreReactions().values()) {
-                        if (reaction.getTrigger().equals(packet.getElement().getId())) {
-                            nearbyEntity.setMetadata("AST_DENDRO_CORE_TRIGGERED", new FixedMetadataValue(MythicCore.getInstance(), true));
-                            dendroCore.remove(true);
-
-                            Bukkit.getPluginManager().callEvent(new DendroCoreReactionEvent(damager, reaction));
-                            if (!reaction.getDisplay().equals("")) Utils.displayIndicator(reaction.getDisplay(), dendroCore.getDendroCore());
-
-                            reaction.trigger(dendroCore, entity, damager, stats, damageCause);
-                        }
+                        reaction.trigger(dendroCore, entity, damager, stats, damageCause);
                     }
                 }
             }
         }
+    }
+
+    private List<DendroCore> getNearbyDendroCore(Location location, double range) {
+        List<DendroCore> dendroCores = new ArrayList<>();
+
+        for (DendroCore dendroCore : DendroCoreManager.dendroCoreIds.values()) {
+            if (dendroCore.getHologram().getLocation().distance(location) <= range && !dendroCore.isIgnited()) {
+                dendroCores.add(dendroCore);
+            }
+        }
+
+        return dendroCores;
     }
 }

@@ -17,7 +17,6 @@ public class MythicCoreCommand extends CommandTreeNode implements CommandExecuto
         addChild(new ReloadCommandTreeNode(this));
         addChild(new ApplyAuraCommandTreeNode(this));
         addChild(new TestCommandTreeNode(this));
-        addChild(new Test2CommandTreeNode(this));
     }
 
     @Override

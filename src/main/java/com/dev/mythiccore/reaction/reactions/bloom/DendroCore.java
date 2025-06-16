@@ -1,5 +1,6 @@
 package com.dev.mythiccore.reaction.reactions.bloom;
 
+import com.Zrips.CMI.Modules.Holograms.CMIHologram;
 import com.dev.mythiccore.combat.Combat;
 import com.dev.mythiccore.enums.MobType;
 import com.dev.mythiccore.utils.ConfigLoader;
@@ -30,21 +31,26 @@ public class DendroCore {
     private final LivingEntity owner;
     private final StatProvider stat_provider;
     private long life_time;
-    private final Entity dendro_core;
+    private final CMIHologram hologram;
     private final UUID uuid;
     private final EntityDamageEvent.DamageCause damage_cause;
     private MobType mob_type;
+    private boolean ignited = false;
 
-    public DendroCore(Bloom instance, @Nullable LivingEntity owner, StatProvider statProvider, long life_time, Entity dendro_core, EntityDamageEvent.DamageCause damage_cause, MobType mob_type) {
+    public DendroCore(Bloom instance, UUID uuid, @Nullable LivingEntity owner, StatProvider statProvider, long life_time, CMIHologram hologram, EntityDamageEvent.DamageCause damage_cause, MobType mob_type) {
         this.instance = instance;
         this.owner = owner;
         this.stat_provider = statProvider;
         this.life_time = life_time;
-        this.dendro_core = dendro_core;
+        this.hologram = hologram;
         this.damage_cause = damage_cause;
         this.mob_type = mob_type;
-        this.uuid = UUID.randomUUID();
+        this.uuid = uuid;
     }
+
+    public void setIgnited(boolean value) { this.ignited = value; }
+
+    public boolean isIgnited() { return ignited; }
 
     public LivingEntity getOwner() {
         return owner;
@@ -62,8 +68,8 @@ public class DendroCore {
         this.life_time = life_time;
     }
 
-    public Entity getDendroCore() {
-        return dendro_core;
+    public CMIHologram getHologram() {
+        return hologram;
     }
 
     public UUID getUUID() {
@@ -101,7 +107,7 @@ public class DendroCore {
 
         try {
 
-            for (Entity entity : dendro_core.getNearbyEntities(explode_radius, explode_radius, explode_radius)) {
+            for (Entity entity : hologram.getWorld().getNearbyEntities(hologram.getLocation(), explode_radius, explode_radius, explode_radius)) {
                 boolean mob_type_filter = owner != null && ConfigLoader.aoeDamageFilterEnable() && mob_type != Combat.getMobType(entity);
                 if (entity == owner || entity.isInvulnerable() || entity.hasMetadata("NPC") || mob_type_filter || (entity instanceof Player player && (player.getGameMode().equals(GameMode.CREATIVE) || player.getGameMode().equals(GameMode.SPECTATOR))))
                     continue;
@@ -136,7 +142,7 @@ public class DendroCore {
                 int volume = Integer.parseInt(raw_sound[1]);
                 int pitch = Integer.parseInt(raw_sound[2]);
 
-                dendro_core.getWorld().playSound(dendro_core.getLocation(), Sound.valueOf(sound), volume, pitch);
+                hologram.getWorld().playSound(hologram.getLocation(), Sound.valueOf(sound), volume, pitch);
             }
 
             for (String p : instance.getConfig().getStringList("dendro-core.explode-particle")) {
@@ -145,7 +151,7 @@ public class DendroCore {
                 int speed = Integer.parseInt(raw_particle[1]);
                 int count = Integer.parseInt(raw_particle[2]);
 
-                dendro_core.getWorld().spawnParticle(Particle.valueOf(particle), dendro_core.getLocation(), count, 0, 0, 0, speed);
+                hologram.getWorld().spawnParticle(Particle.valueOf(particle), hologram.getLocation(), count, 0, 0, 0, speed);
             }
 
         } catch (NumberFormatException ignored) {}
@@ -154,12 +160,9 @@ public class DendroCore {
     }
 
     public void remove() {
-        remove(false);
-    }
 
-    public void remove(boolean remove_in_chunk) {
-
-        if (!remove_in_chunk) this.dendro_core.remove();
+        this.hologram.remove();
+        DendroCoreManager.dendroCoreIds.remove(this.uuid);
 
         try {
             for (Chunk chunk : DendroCoreManager.dendroCoreInChunk.keySet()) {

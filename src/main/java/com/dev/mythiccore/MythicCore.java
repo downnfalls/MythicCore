@@ -152,10 +152,8 @@ public final class MythicCore extends JavaPlugin {
             }
         }
 
-        for (List<DendroCore> dendroCores : DendroCoreManager.dendroCoreInChunk.values()) {
-            for (DendroCore dendroCore : dendroCores) {
-                dendroCore.getDendroCore().remove();
-            }
+        for (DendroCore dendroCore : DendroCoreManager.dendroCoreIds.values()) {
+            dendroCore.remove();
         }
     }
 

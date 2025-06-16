@@ -266,8 +266,10 @@ Elemental-Reaction:
     maximum-dendro-core-per-chunk: 5
     dendro-core-trigger-radius: 4
     dendro-core:
-      material: LIME_STAINED_GLASS
-      model-data: 0
+      lines: # for more information see CMI documentation
+        - "ICON:LIME_STAINED_GLASS%customModelData:0%"
+      following-type: VERTICAL # ITEM, HORIZONTAL, VERTICAL, CENTER, FIXED
+      icon-scale: 2.0
       explode-sound:
         - ENTITY_FIREWORK_ROCKET_BLAST:2:1
       explode-particle:
